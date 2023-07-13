@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% block 'titulo' %} 
+    Categorias de Entradas e Saídas
+{% endblock %}
+{% block 'conteudo' %}
+    <h1>Listar Categorias</h1>
+    <div class="container d-flex flex-column">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Lista de Categorias</h5>
+            </div>
+
+            <!-- MESSAGES -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div 
+                      class="alert text-center mt-2 alert-dismissible fade show {% if 'error' in message.tags %} alert-danger  {% elif 'success' in message.tags %} alert-success {% elif 'warning' in message.tags %} alert-warning {% endif %}"   
+                      role="alert">
+                      {{ message }}
+                      <button 
+                        type="button" 
+                        class="close"     
+                        data-dismiss="alert" 
+                        aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <table class="table">
+                <thead class="thead-dark">
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Categoria</th>
+                    <th scope="col">Tipo</th>
+                    <th scope="col">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    {% for categoria in categorias %}
+                        <tr>
+                        <th scope="row">{{categoria.id}}</th>
+                        <td>{{categoria.categoria}}</td>
+                        {% if categoria.tipo == 1 %}
+                            <td>Entrada</td>
+                        {% else %}
+                            <td>Saída</td>
+                        {% endif %}
+                        <td>
+                            <a href="{% url 'deletar_categoria' categoria.id %}" class="btn btn-danger">Excluir</a>
+                            <a href="#" class="btn btn-light" data-toggle="modal" data-target="#editarCategoria{{categoria.id}}">Editar</a>
+                        </td>
+                        </tr>
+
+                          <!-- Modal Editar Categoria -->
+                          <div class="modal fade" id="editarCategoria{{categoria.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                              <div class="modal-content">
+                                <div class="modal-header">
+                                  <h5 class="modal-title" id="exampleModalLabel">Editar Categoria</h5>
+                                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                  </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form method="POST" action="{% url 'edita_categoria' %}">
+                                        {% csrf_token %}
+                      
+                                        <div class="form-group mb-3">
+                                          <label for="tipo">Tipo de transação</label>
+                                          <select class="form-control" id="tipo" name="tipo">
+                                
+                                            {% if categoria.tipo == 1 %}
+                                                <option value="{{categoria.tipo}}">1 - Entrada</option>
+                                                <option value="2">2 - Saída</option>
+                                            {% else %}
+                                                <option value="{{categoria.tipo}}">2 - Saída</option>
+                                                <option value="1">1 - Entrada</option>
+                                            {% endif %}
+                                          </select>
+                                        </div>
+                      
+                                        <div class="mb-3">
+                                          <label class="form-label" for="categoria">Categoria</label>
+                                          <input
+                                            class="form-control form-control-lg"
+                                            type="text"
+                                            name="categoria"
+                                            id="categoria"
+                                            placeholder="Digite a descrição"
+                                            value="{{categoria.categoria}}"
+                                          />
+                                        </div>
+
+                                        <input type="hidden" name="id" value="{{categoria.id}}">
+
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-primary">Salvar</button>
+                                    </form>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <!-- Fim da modal Editar Categoria -->
+  
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="container">
+                <a class="btn btn-dark m-2" href="{% url 'inserir_categorias' %}">Inserir Categorias</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

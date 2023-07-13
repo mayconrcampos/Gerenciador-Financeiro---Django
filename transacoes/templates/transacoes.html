@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block 'titulo' %} 
+    Gerenciador Financeiro com Django 
+{% endblock %}
+{% block 'conteudo' %}
+    <h1>Transações</h1>
+    <div class="container d-flex flex-column">
+        <div class="row">
+          <div class="col-sm-10 col-md-8 col-lg-6 mx-auto d-table h-100">
+            <div class="d-table-cell align-middle">
+              <div class="text-center">
+                <p class="lead">Cadastre sua transação</p>
+              </div>
+      
+              <div class="card">
+                <!-- MESSAGES -->
+                  {% if messages %} 
+                    {% for message in messages %}
+                        <div
+                          class="alert text-center mt-2 alert-dismissible fade show {% if message.tags == 'error' %} alert-danger {% elif message.tags == 'success' %} alert-success {% endif %}"
+                          role="alert"
+                        >
+                          {{ message }}
+                          <button
+                            type="button"
+                            class="close"
+                            data-dismiss="alert"
+                            aria-label="Fechar"
+                          >
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                    {% endfor %} 
+                  {% endif %}
+                <div class="card-body">
+                  <div class="m-sm-4">
+                    <form method="POST" action="{% url 'insere_transacao' %}">
+                      {% csrf_token %}
+           
+                      <div class="form-group mb-3">
+                        <label for="tipo">Tipo de transação</label>
+                        <select class="form-control" id="tipo" name="tipo">
+                          <option value="1">1 - Entrada</option>
+                          <option value="2">2 - Saída</option>
+                        </select>
+                      </div>
+                    
+                      <div class="mb-3">
+                        <label class="form-label" for="descricao">Descrição</label>
+                        <input
+                          class="form-control form-control-lg"
+                          type="text"
+                          name="descricao"
+                          id="descricao"
+                          placeholder="Digite a descrição"
+                        />
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label" for="valor">Valor</label>
+                        <input
+                          class="form-control form-control-lg"
+                          type="text"
+                          name="valor"
+                          id="valor"
+                          onkeypress="$(this).mask('R$ #.###.###.###,##', {reverse: true});"
+                          placeholder="Digite o valor"
+                        />
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label" for="data">Data</label>
+                        <input
+                          class="form-control form-control-lg"
+                          type="date"
+                          name="data"
+                          id="data"
+                        />
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label" for="categoria">Selecione a Categoria</label>
+                        <select class="form-control" id="categoria" name="categoria">
+                            <option disabled>Entradas</option>
+                            {% for entrada in entradas %}
+                              <option value="{{entrada.id}}">
+                                {{entrada.categoria}}
+                              </option>
+                            {% endfor %}
+                            <option disabled>Saidas</option>
+                            {% for saida in saidas %}
+                              <option value="{{saida.id}}">
+                                {{saida.categoria}}
+                              </option>
+                            {% endfor %}
+                        </select>
+                        <!-- Botão Insere Categoria -->
+                        <div class="container w-100 text-center">
+                            <a href="{% url 'inserir_categorias' %}" class="btn btn-light border mt-2 shadow m-auto">Inserir Categoria</a>
+                        </div>
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label" for="comentario">Comentário</label>
+                        <textarea 
+                            name="comentario"
+                            class="form-control form-control-lg" 
+                            id="comentario" 
+                            cols="30" 
+                            rows="10">
+                        </textarea>
+                      </div>
+                     
+                      <div class="text-center mt-3">
+                        <button type="submit" class="btn btn-lg btn-primary">Cadastrar</button>
+                        <a href="{% url 'index' %}" class="btn btn-lg btn-dark">
+                            Limpar
+                        </a>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+{% endblock %}

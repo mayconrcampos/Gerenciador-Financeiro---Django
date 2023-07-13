@@ -1,0 +1,118 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    {% block 'head' %} {% endblock %}
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900"
+      rel="stylesheet"
+    />
+
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com">    
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link href="{% static 'css/app.css' %}" rel="stylesheet">
+    <title>{% block 'titulo' %} {% endblock %}</title>
+  </head>
+  <body>
+    <div class="wrapper d-flex align-items-stretch">
+      <nav id="sidebar">
+        <div class="custom-menu">
+          <button type="button" id="sidebarCollapse" class="btn btn-dark">
+            <i class="fa fa-bars"></i>
+            <span class="sr-only">Toggle Menu</span>
+          </button>
+        </div>
+        <h1 class="text-center p-2">
+            <a href="{% url 'index' %}" class="bg-dark text-white">
+                <img
+                src="{% static 'images/logos/logo.png' %}"
+                alt="imagem"
+                class="img-fluid"
+                width="132"
+                height="132"
+                />
+            </a>
+        </h1>
+        <ul class="list-unstyled components mb-5">
+          {% if not request.session.usuario %}
+            <li {% if request.path == '/auth/login/' %} class="active"{% endif %}>
+              <a href="{% url 'login' %}"><span class="fa fa-sign-in mr-3"></span> Login</a>
+            </li>
+            <li {% if request.path == '/auth/registrar/' %}class="active"{% endif %}>
+              <a href="{% url 'registrar' %}"><span class="fa fa-plus mr-3"></span> Registrar</a>
+            </li>
+          {% else %}
+            <li {% if request.path == '/usuario/perfil/' %}class="active"{% endif %}>
+                <a href="{% url 'perfil' %}"><span class="fa fa-user mr-3"></span> Perfil</a>
+            </li>
+            <hr>
+              <!-- Menu collapse Categorias -->
+              <li {% if request.path == '/inserir/categorias/' or request.path == '/listar/categorias/' %}class="active"{% endif %}>
+                <a 
+                href="#submenuCategorias"  
+                data-toggle="collapse" 
+                aria-expanded="false"
+                class="dropdown-toggle">
+                  <span class="fa fa-object-group mr-3"></span>Categorias
+                </a>
+                <ul 
+                  class="collapse list-unstyled" 
+                  id="submenuCategorias" 
+                  >
+                  <li>
+                    <a href="{% url 'inserir_categorias' %}">Inserir</a>
+                  </li>
+                  <li>
+                    <a href="{% url 'listar_categorias' %}">Listar</a>
+                  </li>
+                </ul>
+              </li>
+              <!-- Fim de menu Collapse categorias -->
+            <li {% if request.path == '/transacoes/' %}class="active"{% endif %}>
+              <a href="{% url 'transacoes' %}"
+                ><span class="fa fa-exchange mr-3"></span>Transações</a
+              >
+            </li>
+            <li {% if request.path == '/transacoes/entradas/' %}class="active"{% endif %}>
+              <a href="{% url 'entradas' %}"
+                ><span class="fa fa-arrow-down mr-3"></span> Entradas</a
+              >
+            </li>
+            <li {% if request.path == '/transacoes/saidas/' %}class="active"{% endif %}>
+              <a href="{% url 'saidas' %}"><span class="fa fa-arrow-up mr-3"></span> Saídas</a>
+            </li>
+            <li {% if request.path == '/transacoes/balanco/' %}class="active"{% endif %}>
+              <a href="{% url 'balanco' %}"><span class="fa fa-balance-scale mr-3"></span> Balanço</a>
+            </li>
+            {% endif %}
+            {% if request.session.usuario %}
+              <hr>
+              <li><a href="{% url 'sair' %}"><span class="fa fa-sign-out mr-3"></span> Sair</a></li>
+            {% endif %}
+        </ul>
+      </nav>
+      <!-- Page Content  -->
+      <div id="content" class="p-4 p-md-5 pt-5">
+        {% block 'conteudo' %} {% endblock %}
+      </div>
+    </div>
+
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/popper.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/app.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.15/jquery.mask.min.js"></script>
+  </body>
+</html>

@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block 'titulo' %} 
+{% load humanize %}
+    Entradas
+{% endblock %}
+{% block 'conteudo' %}
+    <h1>Entradas Financeiras</h1>
+    <div class="container d-flex flex-column">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Entradas Financeiras</h5>
+            </div>
+            <!-- MESSAGES -->
+            {% if messages %} 
+              {% for message in messages %}
+                  <div
+                    class="alert text-center mt-2 alert-dismissible fade show {% if 'error' in message.tags %} alert-danger {% elif 'success' in message.tags %} alert-success {% endif %}"
+                    role="alert"
+                  >
+                    {{ message }}
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="alert"
+                      aria-label="Fechar"
+                    >
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+              {% endfor %} 
+            {% endif %}
+            <table class="table">
+                <thead class="thead-dark">
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Descrição</th>
+                    <th scope="col">Valor (R$)</th>
+                    <th scope="col">Sub-Total (R$)</th>
+                    <th scope="col">Data</th>
+                    <th scope="col">Categoria</th>
+                    <th scope="col">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for transacao, sub in entradas %}
+                    <tr>
+                      <th scope="row">{{transacao.id}}</th>
+                      <td>{{transacao.descricao}}</td>
+                      <td class="text-right">{{transacao.valor|floatformat:2|intcomma}}</td>
+                      <td class="text-right">{{sub|floatformat:2|intcomma}}</td>
+                      <td>{{transacao.data}}</td>
+                      <td>{{transacao.categoria}}</td> 
+                      <td>
+                        <a class="btn btn-danger" href="{% url 'deleta_transacao' %}?tipo={{transacao.tipo}}&id_transacao={{transacao.id}}">Excluir</a>
+                        <a class="btn btn-light" href="#" data-toggle="modal" data-target="#editarTransacao{{transacao.id}}">Editar</a>
+                      </td>
+                    </tr>
+
+                    <!-- Modal Editar Transação -->
+                    <div class="modal fade modalEditar" id="editarTransacao{{transacao.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Editar Transação</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
+                          </div>
+                          <div class="modal-body">
+                            <form method="POST" action="{% url 'edita_transacao' %}">
+                              {% csrf_token %}
+                   
+                              <div class="form-group mb-3">
+                                <label for="tipo">Tipo de transação</label>
+                                <select class="form-control" id="tipo" name="tipo">
+                                  {% if transacao.tipo == 1 %}
+                                    <option value="{{transacao.tipo}}">1 - Entrada</option>
+                                    <option value="2">2 - Saída</option>
+                                  {% else %}
+                                    <option value="{{transacao.tipo}}">2 - Saída</option>
+                                    <option value="1">1 - Entrada</option>
+                                  {% endif %}
+          
+                                </select>
+                              </div>
+                            
+                              <div class="mb-3">
+                                <label class="form-label" for="descricao">Descrição</label>
+                                <input
+                                  class="form-control form-control-lg"
+                                  type="text"
+                                  name="descricao"
+                                  id="descricao"
+                                  placeholder="Digite a descrição"
+                                  value="{{transacao.descricao}}"
+                                />
+                              </div>
+                              <div class="mb-3">
+                                <label class="form-label" for="valor">Valor</label>
+                                <input
+                                  class="form-control form-control-lg"
+                                  type="text"
+                                  name="valor"
+                                  id="valor"
+                                  onkeypress="$(this).mask('R$ #.###.###.###,##', {reverse: true});"
+                                  value="{{transacao.valor}}"
+                                  placeholder="Digite o valor"
+                                />
+                              </div>
+                              <div class="mb-3">
+                                <label class="form-label" for="data">Data</label>
+                                <input
+                                  class="form-control form-control-lg"
+                                  type="date"
+                                  name="data"
+                                  value="{{transacao.data|date:'Y-m-d'}}"
+                                  id="data"
+                                />
+                              </div>
+                              <div class="mb-3">
+                                <label class="form-label" for="categoria">Selecione a Categoria</label>
+                                <select class="form-control" id="categoria" name="categoria">
+                                    <option disabled>Entradas</option>
+                                    {% for entrada in categorias_entradas %}
+                                      <option value="{{entrada.id}}">
+                                        {{entrada.categoria}}
+                                      </option>
+                                    {% endfor %}
+                                    <option disabled>Saidas</option>
+                                    {% for saida in categorias_saidas %}
+                                      <option value="{{saida.id}}">
+                                        {{saida.categoria}}
+                                      </option>
+                                    {% endfor %}
+                                </select>
+                                <!-- Botão Insere Categoria -->
+                                <div class="container w-100 text-center">
+                                    <a href="{% url 'inserir_categorias' %}" class="btn btn-light border mt-2 shadow m-auto">Inserir Categoria</a>
+                                </div>
+                              </div>
+                              <div class="mb-3">
+                                <label class="form-label" for="comentario">Comentário</label>
+                                <textarea 
+                                    name="comentario"
+                                    class="form-control form-control-lg" 
+                                    id="comentario" 
+                                    cols="30" 
+                                    >
+                                    {{transacao.comentario}}
+                                </textarea>
+                              </div>
+                              <input type="hidden" name="id_transacao" value="{{transacao.id}}">
+                             
+                              <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">Salvar</button>
+                              </form>
+                              <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- Fim da modal Editar Transacao -->
+
+                  {% endfor %}
+                  
+                </tbody>
+              </table>
+              <span class="container">
+                {% if total %}
+                  <h1>TOTAL R$ <span class="badge badge-secondary">{{ total|floatformat:2|intcomma }}</span></h1>
+                {% endif %}
+              </span>
+        </div>
+    </div>
+    <!-- Javascript -->
+
+{% endblock %}
