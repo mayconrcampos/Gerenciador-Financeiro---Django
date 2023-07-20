@@ -11,12 +11,12 @@ def index(request):
 
 def login(request):
     if "usuario" in request.session:
-        return redirect("balanco")
+        return redirect("perfil")
     return render(request, "login.html")
 
 def registrar(request):
     if "usuario" in request.session:
-        return redirect("balanco")
+        return redirect("perfil")
     return render(request, "registrar.html")
 
 def perfil(request):

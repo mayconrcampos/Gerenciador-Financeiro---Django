@@ -9,7 +9,33 @@
         <div class="card mb-3">
             <div class="card-header">
                 <h5 class="card-title mb-0">Saídas Financeiras</h5>
+                <select name="limite" class="custom-select w-25" onchange="pagination(this.value)">
+                  <option selected>Itens por página</option>
+                  <option value="5">5</option>
+                  <option value="10">10</option>
+                  <option value="20">20</option>
+                  <option value="50">50</option>
+                </select>
             </div>
+            <!-- MESSAGES -->
+            {% if messages %} 
+              {% for message in messages %}
+                <div
+                  class="alert text-center mt-2 alert-dismissible fade show {% if 'error' in message.tags %} alert-danger {% elif 'success' in message.tags %} alert-success {% endif %}"
+                  role="alert"
+                >
+                  {{ message }}
+                  <button
+                    type="button"
+                    class="close"
+                    data-dismiss="alert"
+                    aria-label="Fechar"
+                  >
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+              {% endfor %} 
+            {% endif %}
             <table class="table">
                 <thead class="thead-dark">
                   <tr>
@@ -158,6 +184,56 @@
                   <h1>TOTAL R$ <span class="badge badge-secondary">{{ total|floatformat:2|intcomma }}</span></h1>
                 {% endif %}
               </span>
+              <!-- Paginação -->
+              <div class="pagination justify-content-center mt-4">
+                <ul class="pagination">
+                  {% if balancos.has_previous %}
+                    <li class="page-item">
+                      <a class="page-link" href="?pagina={{ balancos.previous_page_number }}&limite={{ limite }}">Anterior</a>
+                    </li>
+                  {% endif %}
+                  
+                  {% for balanco, subtotal in transacoes %}
+                    {% if balanco.number == balancos.number %}
+                      <li class="page-item active">
+                        <span class="page-link">{{ balanco.number }}</span>
+                      </li>
+                    {% else %}
+                      <li class="page-item">
+                        <a class="page-link" href="?pagina={{ balanco.number }}&limite={{ limite }}">{{ balanco.number }}</a>
+                      </li>
+                    {% endif %}
+                  {% endfor %}
+                    
+                  {% if balancos.has_next %}
+                    <li class="page-item">
+                      <a class="page-link" href="?pagina={{ balancos.next_page_number }}&limite={{ limite }}">Próxima</a>
+                    </li>
+                  {% endif %}
+                </ul>
+              </div>
+
+
+              
         </div>
     </div>
+    <script>
+      function pagination(valor) {
+        localStorage.setItem('limiteSelecionado', valor);
+        // Verifica se o valor selecionado é diferente do valor atual do parâmetro 'limite'
+        var urlParams = new URLSearchParams(window.location.search);
+        var limiteParam = urlParams.get('limite');
+        if (limiteParam !== valor) {
+          window.location.href = '?limite=' + valor;
+        }
+      }
+      // Recupera o valor da localStorage ao carregar a página
+      document.addEventListener('DOMContentLoaded', function() {
+        var limiteSelecionado = localStorage.getItem('limiteSelecionado');
+        var selectElement = document.querySelector('select[name="limite"]');
+        if (limiteSelecionado) {
+          selectElement.value = limiteSelecionado;
+        }
+      });
+    </script>
 {% endblock %}

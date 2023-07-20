@@ -5,6 +5,7 @@ from categorias.models import Categoria, TipoChoices
 from django.contrib import messages
 from .models import Transacao, TipoEscolha
 from datetime import datetime
+from django.core.paginator import Paginator, EmptyPage
 
 # Services
 def validar_valor_monetario(valor: str):
@@ -15,6 +16,12 @@ def validar_valor_monetario(valor: str):
             return numero
         else:
             return False
+    except ValueError:
+        return False
+
+def valida_numero_inteiro(num: str):
+    try:
+        return int(num)
     except ValueError:
         return False
 
@@ -88,30 +95,64 @@ def balanco(request):
     categorias_entradas = Categoria.objects.filter(usuario=usuario).filter(tipo=TipoChoices.ENTRADA)
     categorias_saidas = Categoria.objects.filter(usuario=usuario).filter(tipo=TipoChoices.SAIDA)
 
+    # Paginação - Instanciando objeto paginator - Valores padrão
+    limite = request.GET.get("limite", "5") # Numero de itens por página
+    limite = max(int(limite), 5)
+    pagina = request.GET.get("pagina", "1") # Número da página
 
-    if balancos.exists():
-        total = 0
-        subtotal = []
-        for i in balancos:
-            if i.tipo == 1:
-                total += i.valor
-            else:
-                total -= i.valor
+    if not valida_numero_inteiro(limite):
+        limite = "5"
+    if not valida_numero_inteiro(pagina):
+        pagina = "1"
+    """
+        Paginator(Lista a ser paginada, itens por página)
+    """
+    try:
+
+        if balancos.exists():
+            total = 0
+            subtotal = []
+            balancos_list = list(balancos)
+            for i in balancos_list:
+                if i.tipo == 1:
+                    total += i.valor
+                else:
+                    total -= i.valor
+                
+                subtotal.append(total)
             
-            subtotal.append(total)
-        
-        lista = zip(balancos, subtotal)
 
-        context = {
-            "transacoes": lista,
-            "total": total,
-            "categorias_entradas": categorias_entradas,
-            "categorias_saidas": categorias_saidas
+            # Limite de itens por página
+            balancos_paginator = Paginator(balancos_list, limite)
+            # Número da página
+            page_balancos = balancos_paginator.page(int(pagina))
+            
+            # Limite de itens por página
+            subtotal_paginator = Paginator(subtotal, limite)
+            # Número da página
+            page_subtotal = subtotal_paginator.page(int(pagina))
+            
+            lista = zip(page_balancos, page_subtotal)
 
-        }
-        return render(request, "balanco.html", context)
-    messages.error(request, "Não existem transações cadastradas")
-    return render(request, "balanco.html", {"transacoes": []})
+            context = {
+                "balancos": page_balancos,
+                "subtotais": page_subtotal,
+                "total": total,
+                "transacoes": lista,
+                "categorias_entradas": categorias_entradas,
+                "categorias_saidas": categorias_saidas,
+                "limite": int(limite),
+                "pagina_atual": page_balancos.number,
+                "total_paginas": balancos_paginator.num_pages
+            }
+            return render(request, "balanco.html", context)
+        else:
+            messages.error(request, "Não existem transações cadastradas")
+            return render(request, "balanco.html", {"transacoes": []})
+
+    except (UnboundLocalError, ZeroDivisionError, EmptyPage, AssertionError):
+        messages.error(request, "Página inválida")
+        return render(request, "balanco.html", {"transacoes": []})
 
 def insere_transacao(request):
     if not "usuario" in request.session:
