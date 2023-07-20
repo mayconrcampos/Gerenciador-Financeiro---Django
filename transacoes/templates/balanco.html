@@ -193,14 +193,14 @@
                     </li>
                   {% endif %}
                   
-                  {% for balanco, subtotal in transacoes %}
-                    {% if balanco.number == balancos.number %}
-                      <li class="page-item active">
-                        <span class="page-link">{{ balanco.number }}</span>
+                  {% for page in balancos.paginator.page_range %}
+                    {% if balancos.number == page %}
+                      <li class="page-item active disabled">
+                        <span class="page-link">{{ balancos.number }}</span>
                       </li>
                     {% else %}
                       <li class="page-item">
-                        <a class="page-link" href="?pagina={{ balanco.number }}&limite={{ limite }}">{{ balanco.number }}</a>
+                        <a class="page-link" href="?pagina={{ page }}&limite={{ limite }}">{{page}}</a>
                       </li>
                     {% endif %}
                   {% endfor %}
@@ -212,6 +212,7 @@
                   {% endif %}
                 </ul>
               </div>
+              <!-- FIM DA PAGINAÇÃO -->
 
 
               
